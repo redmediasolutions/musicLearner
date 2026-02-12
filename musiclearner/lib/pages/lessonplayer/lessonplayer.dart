@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musiclearner/components/aboutinstructor.dart';
-import 'package:musiclearner/components/custombottomlesson.dart';
+//import 'package:musiclearner/components/custombottomlesson.dart';
 import 'package:musiclearner/components/next_lesson.dart';
 import 'package:musiclearner/components/videoplayer.dart';
 
@@ -258,7 +258,7 @@ Padding(
           ]
         ),
       ),
-      bottomNavigationBar: const Custombottomlesson(),
+     // bottomNavigationBar: const Custombottomlesson(),
     );
   }
 }

@@ -22,7 +22,7 @@ class Coursedetails extends StatelessWidget {
         centerTitle: true,
         leading:  IconButton(
           onPressed: () {
-            context.pop();
+            context.go('/home');
           },
            icon: Icon(Icons.arrow_back_ios_new_rounded,
                   color: Colors.white, size: 20),
@@ -235,7 +235,7 @@ class Coursedetails extends StatelessWidget {
         ),
       ),
 
-      bottomNavigationBar: const Buynow(
+      bottomNavigationBar: const Buybottombar(
         title: "LIFETIME ACCESS",
         price: "₹499",
         oldprice: "₹2,499",

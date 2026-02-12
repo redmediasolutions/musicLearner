@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Custombottomhome extends StatefulWidget {
   const Custombottomhome({super.key});
@@ -45,9 +46,13 @@ class CustombottomhomeState extends State<Custombottomhome> {
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selectedindex = index;
-        });
+        if (index == 3) {
+          context.pushNamed('profile');
+        } else {
+          setState(() {
+            selectedindex = index;
+          });
+        }
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

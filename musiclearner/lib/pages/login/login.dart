@@ -168,6 +168,7 @@ class Login extends StatelessWidget {
                   onPressed: () {
                     context.pushNamed('homelanding');
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1437EF),
                     shape: RoundedRectangleBorder(

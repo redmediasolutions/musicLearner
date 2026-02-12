@@ -1,8 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:musiclearner/components/coursecards.dart';
-import 'package:musiclearner/components/custombottomhome.dart';
 import 'package:musiclearner/components/learning_prog.dart';
 import 'package:musiclearner/components/smallcoursecards.dart';
 
@@ -29,10 +29,15 @@ class Homelanding extends StatelessWidget {
 
                   Row(
                     children: [
-                      const CircleAvatar(
-                        radius: 22,
-                        backgroundImage: NetworkImage(
-                          "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60",
+                      GestureDetector(
+                        onTap: () {
+                          context.pushNamed('profile');
+                        },
+                        child: const CircleAvatar(
+                          radius: 22,
+                          backgroundImage: NetworkImage(
+                            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60",
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -306,7 +311,6 @@ Padding(
           ]
         ),
       ),
-      bottomNavigationBar: const Custombottomhome(),
     );
   }
 }

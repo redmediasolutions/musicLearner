@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class Buynow extends StatelessWidget {
+class Buybottombar extends StatelessWidget {
   final String title;
   final String price;
   final String oldprice;
   final String buttontext;
 
-  const Buynow({
+  const Buybottombar({
     super.key,
     this.title = "LIFETIME ACCESS",
     this.price = "₹499",
@@ -66,30 +67,35 @@ class Buynow extends StatelessWidget {
           const Spacer(),
 
           // RIGHT SIDE BUTTON
-          Container(
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1437EF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  buttontext,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+          GestureDetector(
+            onTap: () {
+              context.pushNamed('buynowpage');
+            },
+            child: Container(
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1437EF),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    buttontext,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                const Icon(
-                  Icons.arrow_forward,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  const Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -19,7 +19,7 @@ class LearningProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 300, 
+      width: 420, 
       margin: const EdgeInsets.only(right: 15),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -81,7 +81,7 @@ class LearningProgress extends StatelessWidget {
                 const SizedBox(height: 15),
 
                 Container(
-                  width: 160,
+                  width: 300,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
@@ -89,14 +89,16 @@ class LearningProgress extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(Icons.play_arrow, color: Colors.white),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 5),
                       Text(
                         buttontext,
                         style: const TextStyle(
                           color: Colors.white,
+                          fontSize: 17,
+                          
                           fontWeight: FontWeight.w600,
                         ),
                       ),
