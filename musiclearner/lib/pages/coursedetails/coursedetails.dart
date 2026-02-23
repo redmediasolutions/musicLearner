@@ -6,9 +6,12 @@ import 'package:musiclearner/components/aboutinstructor.dart';
 import 'package:musiclearner/components/buybottombar.dart';
 import 'package:musiclearner/components/curriculumcards.dart';
 import 'package:musiclearner/components/videoplayer.dart';
+import 'package:musiclearner/pages/coursedetails/course_model.dart';
 
 class Coursedetails extends StatelessWidget {
-  const Coursedetails({super.key});
+  final CourseModel course;
+
+  const Coursedetails({super.key, required this.course});
 
   @override
   Widget build(BuildContext context) {
@@ -20,44 +23,44 @@ class Coursedetails extends StatelessWidget {
         elevation: 0,
         automaticallyImplyLeading: false,
         centerTitle: true,
-        leading:  IconButton(
+        leading: IconButton(
           onPressed: () {
             context.go('/home');
           },
-           icon: Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
         ),
-        title:   Text(
-              "Course Details",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+        title: Text(
+          "Course Details",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.share, color: Colors.white, size: 20)
-
-          ),],
+            icon: const Icon(Icons.share, color: Colors.white, size: 20),
+          ),
+        ],
       ),
 
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             const SizedBox(height: 20),
 
             // VIDEO PLAYER
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Videoplayer(
-                videourl:
-                    "https://www.mediafire.com/file/u707a7mmrhl6gzu/Export+Test.mov/file",
-                thumbnailurl:
-                    "https://plus.unsplash.com/premium_photo-1673804248447-5a405ff3ddbd?w=500",
+                videourl: course.videoUrl,
+                thumbnailurl: course.thumbnailUrl,
               ),
             ),
 
@@ -75,8 +78,10 @@ class Coursedetails extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       child: Text(
                         "BESTSELLER",
                         style: TextStyle(

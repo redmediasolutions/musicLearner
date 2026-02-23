@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:musiclearner/services/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -204,8 +206,11 @@ Column(
     Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       child: GestureDetector(
-        onTap: () {
-          context.goNamed('loginpage');
+        onTap: () async {
+          await Provider.of<AuthProvider>(context, listen: false).logout();
+          if (context.mounted) {
+            context.goNamed('loginpage');
+          }
         },
         child: Container(
           padding: const EdgeInsets.all(16),
