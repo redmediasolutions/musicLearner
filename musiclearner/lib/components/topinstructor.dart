@@ -4,14 +4,14 @@ class Topinstructor extends StatelessWidget {
   final String img;
   final String name;
   final String subtitle;
-  final double rating;
+  // final double rating;
 
   const Topinstructor({
     super.key,
     required this.img,
     required this.name,
     required this.subtitle,
-    required this.rating,
+    // required this.rating,
   });
 
   @override
@@ -62,30 +62,30 @@ class Topinstructor extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // ⭐ RATING BADGE
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0D0F24),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFF1C2140)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star, color: Colors.amber, size: 16),
-                const SizedBox(width: 6),
-                Text(
-                  rating.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // // ⭐ RATING BADGE
+          // Container(
+          //   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          //   decoration: BoxDecoration(
+          //     color: const Color(0xFF0D0F24),
+          //     borderRadius: BorderRadius.circular(12),
+          //     border: Border.all(color: const Color(0xFF1C2140)),
+          //   ),
+            // child: Row(
+            //   mainAxisSize: MainAxisSize.min,
+            //   children: [
+            //     const Icon(Icons.star, color: Colors.amber, size: 16),
+            //     const SizedBox(width: 6),
+                // Text(
+                //   rating.toString(),
+                //   style: const TextStyle(
+                //     color: Colors.white,
+                //     fontSize: 13,
+                //     fontWeight: FontWeight.w600,
+                //   ),
+                // ),
+            //   ],
+            // ),
+          // ),
         ],
       ),
     );

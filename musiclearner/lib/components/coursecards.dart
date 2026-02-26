@@ -8,9 +8,9 @@ class Coursecards extends StatelessWidget {
   final String lessons;
   final String title;
   final String instructor;
-  final String price;
-  final String oldPrice;
-  final double rating;
+  // final String price;
+  // final String oldPrice;
+  // final double rating;
 
   const Coursecards({
     super.key,
@@ -18,9 +18,9 @@ class Coursecards extends StatelessWidget {
     required this.lessons,
     required this.title,
     required this.instructor,
-    required this.price,
-    required this.oldPrice,
-    required this.rating,
+    // required this.price,
+    // required this.oldPrice,
+    // required this.rating,
   });
 
   @override
@@ -108,50 +108,17 @@ class Coursecards extends StatelessWidget {
       
                   // PRICE AND RATING ROW
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // Price Section
-                      Row(
-                        children: [
-                          Text(
-                            price,
-                            style: const TextStyle(
-                              color: Color(0xFF1437EF),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            oldPrice,
-                            style: const TextStyle(
-                              color: Colors.white38,
-                              fontSize: 13,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                        ],
-                      ),
-      
-                      // Rating Section
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            size: 16,
-                            color: Colors.amber,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            rating.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          )
-                        ],
-                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.arrow_forward_ios,
+                            size: 12, color: Colors.white),
+                      )
                     ],
                   )
                 ],

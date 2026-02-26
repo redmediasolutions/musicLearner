@@ -6,16 +6,16 @@ class SmallCourseCard extends StatelessWidget {
   final String img;
   final String title;
   final String instructor;
-  final String price;
-  final String discount;
+  // final String price;
+  // final String discount;
 
   const SmallCourseCard({
     super.key,
     required this.img,
     required this.title,
     required this.instructor,
-    required this.price,
-    required this.discount,
+    // required this.price,
+    // required this.discount,
   });
 
   @override
@@ -72,35 +72,35 @@ class SmallCourseCard extends StatelessWidget {
 
                 const SizedBox(height: 8),
 
-                Row(
-                  children: [
-                    Text(
-                      price,
-                      style: const TextStyle(
-                        color:Color(0xFF1437EF),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1B403B),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        discount,
-                        style: const TextStyle(
-                          color: Color(0xFF42C675),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  ],
-                )
+                // Row(
+                //   children: [
+                //     Text(
+                //       price,
+                //       style: const TextStyle(
+                //         color:Color(0xFF1437EF),
+                //         fontSize: 15,
+                //         fontWeight: FontWeight.w700,
+                //       ),
+                //     ),
+                //     const SizedBox(width: 8),
+                //     Container(
+                //       padding: const EdgeInsets.symmetric(
+                //           horizontal: 8, vertical: 2),
+                //       decoration: BoxDecoration(
+                //         color: const Color(0xFF1B403B),
+                //         borderRadius: BorderRadius.circular(6),
+                //       ),
+                //       child: Text(
+                //         discount,
+                //         style: const TextStyle(
+                //           color: Color(0xFF42C675),
+                //           fontSize: 11,
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //     )
+                //   ],
+                // )
               ],
             ),
           ),

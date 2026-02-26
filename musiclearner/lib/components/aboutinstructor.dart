@@ -4,16 +4,16 @@ class Aboutinstructor extends StatelessWidget {
   final String name;
   final String subtitle;
   final String img;
-  final double rating;
-  final String students;
+  // final double rating;
+  // final String students;
 
   const Aboutinstructor({
     super.key,
     required this.name,
     required this.subtitle,
     required this.img,
-    required this.rating,
-    required this.students,
+    // required this.rating,
+    // required this.students,
   });
 
   @override
@@ -62,55 +62,9 @@ class Aboutinstructor extends StatelessWidget {
         ),
     
         // RATING & STUDENTS
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
-              children: [
-                Text(
-                  rating.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                  size: 18,
-                ),
-              ],
-            ),
-    
-            const SizedBox(height: 6),
-    
-            Padding(
-              padding: const EdgeInsets.only(right: 30.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    students,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const Text(
-                    "STUDENTS",
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 10,
-                      letterSpacing: 1,
-                    ),
-                  ),
+      
                 ],
-              ),
-            )
-          ],
-        ),
-      ],
     );
+              
   }
 }

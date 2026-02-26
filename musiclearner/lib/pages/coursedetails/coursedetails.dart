@@ -3,15 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musiclearner/components/aboutinstructor.dart';
-import 'package:musiclearner/components/buybottombar.dart';
+//import 'package:musiclearner/components/buybottombar.dart';
 import 'package:musiclearner/components/curriculumcards.dart';
 import 'package:musiclearner/components/videoplayer.dart';
-import 'package:musiclearner/pages/coursedetails/course_model.dart';
 
 class Coursedetails extends StatelessWidget {
-  final CourseModel course;
-
-  const Coursedetails({super.key, required this.course});
+  const Coursedetails({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,44 +20,44 @@ class Coursedetails extends StatelessWidget {
         elevation: 0,
         automaticallyImplyLeading: false,
         centerTitle: true,
-        leading: IconButton(
+        leading:  IconButton(
           onPressed: () {
             context.go('/home');
           },
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
-            size: 20,
-          ),
+           icon: Icon(Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white, size: 20),
         ),
-        title: Text(
-          "Course Details",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title:   Text(
+              "Course Details",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.share, color: Colors.white, size: 20),
-          ),
-        ],
+            icon: const Icon(Icons.share, color: Colors.white, size: 20)
+
+          ),],
       ),
 
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
             const SizedBox(height: 20),
 
             // VIDEO PLAYER
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
               child: Videoplayer(
-                videourl: course.videoUrl,
-                thumbnailurl: course.thumbnailUrl,
+                videourl:
+                    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                thumbnailurl:
+                    "https://plus.unsplash.com/premium_photo-1673804248447-5a405ff3ddbd?w=500",
               ),
             ),
 
@@ -78,10 +75,8 @@ class Coursedetails extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       child: Text(
                         "BESTSELLER",
                         style: TextStyle(
@@ -119,8 +114,8 @@ class Coursedetails extends StatelessWidget {
                 subtitle: "Expert Blues Guitarist • 12 years exp.",
                 img:
                     "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&q=60",
-                rating: 4.9,
-                students: "12.6K",
+                // rating: 4.9,
+                // students: "12.6K",
               ),
             ),
 
@@ -240,12 +235,12 @@ class Coursedetails extends StatelessWidget {
         ),
       ),
 
-      bottomNavigationBar: const Buybottombar(
-        title: "LIFETIME ACCESS",
-        price: "₹499",
-        oldprice: "₹2,499",
-        buttontext: "Buy Now",
-      ),
+      // bottomNavigationBar: const Buybottombar(
+      //   title: "LIFETIME ACCESS",
+      //   price: "₹499",
+      //   oldprice: "₹2,499",
+      //   buttontext: "Buy Now",
+      // ),
     );
   }
 }

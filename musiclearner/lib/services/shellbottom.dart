@@ -13,8 +13,8 @@ class ShellLayout extends StatelessWidget {
     final location = GoRouterState.of(context).uri.path;
 
     int index = 0;
-    if (location.startsWith('/explore')) index = 1;
-    if (location.startsWith('/learning')) index = 2;
+    if (location.startsWith('/notifications')) index = 1;
+    if (location.startsWith('/fees')) index = 2;
     if (location.startsWith('/profile')) index = 3;
 
     return Scaffold(
@@ -36,8 +36,8 @@ class ShellLayout extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             nav(context, Icons.home_rounded, "Home", 0, index),
-            nav(context, Icons.explore_rounded, "Explore", 1, index),
-            nav(context, Icons.school_rounded, "Learning", 2, index),
+            nav(context, Icons.notifications, "Notifications", 1, index),
+            nav(context, Icons.money_rounded, "Fees", 2, index),
             nav(context, Icons.person_rounded, "Profile", 3, index),
           ],
         ),
@@ -52,8 +52,8 @@ class ShellLayout extends StatelessWidget {
       onTap: () {
         HapticFeedback.mediumImpact();
         if (itemIndex == 0) context.go('/home');
-        if (itemIndex == 1) context.go('/explore');
-        if (itemIndex == 2) context.go('/learning');
+        if (itemIndex == 1) context.go('/notifications');
+        if (itemIndex == 2) context.go('/fees');
         if (itemIndex == 3) context.go('/profile');
       },
       behavior: HitTestBehavior.opaque,
@@ -63,7 +63,7 @@ class ShellLayout extends StatelessWidget {
           Icon(
             icon,
             size: 26,
-            color: selected ? const Color(0xFF4B6AFF) : Colors.white54,
+            color: selected ? const Color(0xFFB7BDF7) : Colors.white54,
           ),
           const SizedBox(height: 6),
           Text(
@@ -71,7 +71,7 @@ class ShellLayout extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: selected ? const Color(0xFF4B6AFF) : Colors.white54,
+              color: selected ? const Color(0xFFB7BDF7) : Colors.white54,
             ),
           ),
         ],

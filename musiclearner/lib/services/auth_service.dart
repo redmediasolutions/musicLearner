@@ -1,43 +1,24 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
-  final _supabase = Supabase.instance.client;
+  final supabase = Supabase.instance.client;
 
-  User? get currentUser => _supabase.auth.currentUser;
-
-  Stream<AuthState> get authStateChanges =>
-      _supabase.auth.onAuthStateChange;
-
-  Future<AuthResponse> signIn({
-    required String email,
+  Future<Map<String, dynamic>> loginWithProfile({
+    required String identifier,
     required String password,
   }) async {
-    return await _supabase.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
-  }
-
-  Future<AuthResponse> signUp({
-    required String email,
-    required String password,
-  }) async {
-    return await _supabase.auth.signUp(
-      email: email,
-      password: password,
-    );
-  }
-
-  Future<void> signOut() async {
-    await _supabase.auth.signOut();
-  }
-
-  Future<Map<String, dynamic>?> getUserProfile(String userId) async {
-    final response = await _supabase
-        .from('useraccount')
+    // We must use these exact column names from your screenshot
+    final response = await supabase
+        .from('profile')
         .select()
-        .eq('id', userId)
-        .single();
+        .or('student_email.eq.$identifier,student_rollno.eq.$identifier')
+        .eq('student_password', password)
+        .maybeSingle();
+
+    if (response == null) {
+      // If this triggers, either the identifier or password doesn't match the row
+      throw const AuthException("Invalid Email/Roll Number or Password");
+    }
 
     return response;
   }

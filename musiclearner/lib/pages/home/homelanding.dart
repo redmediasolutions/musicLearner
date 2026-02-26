@@ -2,37 +2,52 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:musiclearner/components/coursecards.dart';
-import 'package:musiclearner/components/learning_prog.dart';
-import 'package:musiclearner/components/smallcoursecards.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/auth_provider.dart';
+import 'package:musiclearner/components/quickaccess.dart';
 
 class Homelanding extends StatelessWidget {
   const Homelanding({super.key});
+
+  Future<String?> _getStudentName(BuildContext context) async {
+    final authProvider = context.read<AuthProvider>();
+    final rollNo = authProvider.studentProfile?['student_rollno'];
+
+    if (rollNo == null) return "STUDENT";
+
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase
+          .from('student')
+          .select('student_name')
+          .eq('student_rollno', rollNo)
+          .maybeSingle();
+
+      return response?['student_name'];
+    } catch (e) {
+      return "STUDENT";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0D0F24),
-
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // TOP SECTION
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () {
-                          context.pushNamed('profile');
-                        },
+                        onTap: () => context.pushNamed('profile'),
                         child: const CircleAvatar(
                           radius: 22,
                           backgroundImage: NetworkImage(
@@ -41,11 +56,10 @@ class Homelanding extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             "WELCOME BACK",
                             style: TextStyle(
                               color: Colors.white70,
@@ -53,38 +67,53 @@ class Homelanding extends StatelessWidget {
                               letterSpacing: 1,
                             ),
                           ),
-                          SizedBox(height: 3),
-                          Text(
-                            "Keerthan",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              letterSpacing: 1.6,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          const SizedBox(height: 3),
+                          FutureBuilder<String?>(
+                            future: _getStudentName(context),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const SizedBox(
+                                  height: 10,
+                                  width: 10,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Color(0xFFB7BDF7),
+                                  ),
+                                );
+                              }
+                              // Displays fetched name or fallback to "KEERTHAN"
+                              final displayName = snapshot.data ?? "KEERTHAN"; 
+                              return Text(
+                                displayName.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  letterSpacing: 1.6,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
                     ],
                   ),
-
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.notifications,
-                      color: Colors.white,
-                      size: 22,
+                    child: const CircleAvatar(
+                      radius: 22,
+                      backgroundImage: NetworkImage(
+                        "https://t3.ftcdn.net/jpg/04/91/76/62/360_F_491766294_h4j7LbW2YgfbNHhq7F8GboIc1XyBSEY5.jpg",
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-
-            // SEARCH BAR
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
@@ -97,24 +126,21 @@ class Homelanding extends StatelessWidget {
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     icon: Icon(Icons.search, color: Colors.white54),
-                    hintText: "Search music courses...",
+                    hintText: "Search for anything...",
                     hintStyle: TextStyle(color: Colors.white54),
                     border: InputBorder.none,
                   ),
                 ),
               ),
             ),
-
             const SizedBox(height: 25),
-
-            // CONTINUE LEARNING HEADER
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
                   Text(
-                    "Continue Learning",
+                    "Quick Access",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -125,7 +151,7 @@ class Homelanding extends StatelessWidget {
                   Text(
                     "View All",
                     style: TextStyle(
-                      color: Color(0xFF1437EF),
+                      color: Color(0xFFB7BDF7),
                       fontWeight: FontWeight.w900,
                       fontSize: 14,
                     ),
@@ -133,182 +159,54 @@ class Homelanding extends StatelessWidget {
                 ],
               ),
             ),
-
-            const SizedBox(height: 15),
-
-            // HORIZONTAL SCROLL
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: const [
-                  SizedBox(width: 20),
-
-                  
-                  LearningProgress(
-                    lessontitle: "Lesson 4: Major Scales",
-                    coursetitle: "Mastering Jazz\nGuitar",
-                    img: "https://i.imgur.com/DvpvklR.png",
-                    progress: 0.75,
-                    buttontext: "Resume",
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  HomeIconButton(
+                    icon: Icons.description,
+                    title: "Admission details",
+                    backgroundColor: const Color(0xFFB7BDF7).withOpacity(0.2),
+                    iconcolor: const Color(0xFFB7BDF7),
+                    onTap: () => context.pushNamed('admissiondetails'),
                   ),
-
-                  
-                  LearningProgress(
-                    lessontitle: "Lesson 2: Chords",
-                    coursetitle: "Acoustic\nBasics",
-                    img: "https://i.imgur.com/BoN9kdC.png",
-                    progress: 0.40,
-                    buttontext: "Resume",
+                  const SizedBox(height: 20),
+                  HomeIconButton(
+                    icon: Icons.money,
+                    title: "Pending fees",
+                    iconcolor: const Color(0xFFB7BDF7),
+                    backgroundColor: const Color(0xFFB7BDF7).withOpacity(0.2),
+                    onTap: ()=> context.pushNamed('fees'),
                   ),
-
-       
-                  LearningProgress(
-                    lessontitle: "Lesson 1: Introduction",
-                    coursetitle: "Music Theory\nFundamentals",
-                    img: "https://i.imgur.com/BoN9kdC.png",
-                    progress: 0.90,
-                    buttontext: "Resume",
+                  const SizedBox(height: 20),
+                  HomeIconButton(
+                    icon: Icons.article,
+                    iconcolor: const Color(0xFFB7BDF7),
+                    title: "Admission fee",
+                    backgroundColor: const Color(0xFFB7BDF7).withOpacity(0.2),
+                    onTap: () {},
                   ),
-
-                  SizedBox(width: 20),
+                  const SizedBox(height: 20),
+                  HomeIconButton(
+                    icon: Icons.upload,
+                    iconcolor: const Color(0xFFB7BDF7),
+                    title: "Upload Documents",
+                    backgroundColor: const Color(0xFFB7BDF7).withOpacity(0.2),
+                    onTap: () {},
+                  ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 30),
-            Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 20),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      const Text(
-        "Featured Courses",
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          letterSpacing: 1.3,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-
-      // TRENDING 
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1437EF).withOpacity(0.2), // light blue bg
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Text(
-          "TRENDING",
-          style: TextStyle(
-            color: Color(0xFF1437EF), // blue text
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
-      ),
-    ],
-  ),
-),
-const SizedBox(height: 18),
-
-// HORIZONTAL 
-SingleChildScrollView(
-  scrollDirection: Axis.horizontal,
-  physics: const BouncingScrollPhysics(),
-  padding: const EdgeInsets.symmetric(horizontal: 20),
-  child: Row(
-    children: const [
-      Coursecards(
-        img: "https://media.istockphoto.com/id/1039281614/photo/young-boy-teaching-to-play-guitar.webp?a=1&b=1&s=612x612&w=0&k=20&c=3cJpKnrQAwRdUBsgiNLpoXUjuLbYyfCutF2Y0JRFpKc=",
-        lessons: "12 Lessons",
-        title: "Pro Mixing Secrets",
-        instructor: "David Miller",
-        price: "₹499",
-        oldPrice: "₹1,899",
-        rating: 4.9,
-      ),
-
-      SizedBox(width: 15),
-
-      Coursecards(
-        img: "https://media.istockphoto.com/id/1039281614/photo/young-boy-teaching-to-play-guitar.webp?a=1&b=1&s=612x612&w=0&k=20&c=3cJpKnrQAwRdUBsgiNLpoXUjuLbYyfCutF2Y0JRFpKc=",
-        lessons: "9 Lessons",
-        title: "Guitar Masterclass",
-        instructor: "Arjun Rao",
-        price: "₹699",
-        oldPrice: "₹2,499",
-        rating: 4.7,
-      ),
-
-      SizedBox(width: 15),
-
-      Coursecards(
-        img: "https://media.istockphoto.com/id/1039281614/photo/young-boy-teaching-to-play-guitar.webp?a=1&b=1&s=612x612&w=0&k=20&c=3cJpKnrQAwRdUBsgiNLpoXUjuLbYyfCutF2Y0JRFpKc=",
-        lessons: "15 Lessons",
-        title: "Piano Mastery",
-        instructor: "Sarah Jenkins",
-        price: "₹899",
-        oldPrice: "₹2,999",
-        rating: 4.8,
-      ),
-
-      SizedBox(width: 15),
-
-      Coursecards(
-        img: "https://media.istockphoto.com/id/1039281614/photo/young-boy-teaching-to-play-guitar.webp?a=1&b=1&s=612x612&w=0&k=20&c=3cJpKnrQAwRdUBsgiNLpoXUjuLbYyfCutF2Y0JRFpKc=",
-        lessons: "8 Lessons",
-        title: "Drumming Basics",
-        instructor: "Mike Portnoy",
-        price: "₹550",
-        oldPrice: "₹1,500",
-        rating: 4.6,
-      ),
-    ],
-  ),
-),
-
-const SizedBox(height: 30),
-
-const Padding(
-  padding: EdgeInsets.symmetric(horizontal: 20),
-  child: Text(
-    "Budget Friendly Picks",
-    style: TextStyle(
-      color: Colors.white,
-      fontSize: 16,
-      letterSpacing: 1.3,
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-),
-
-const SizedBox(height: 20),
-Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 20),
-  child: Column(
-    children: const [
-      SmallCourseCard(
-        img: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGlhbm98ZW58MHx8MHx8fDA%3D",
-        title: "Rock Drumming Basics",
-        instructor: "James Taylor",
-        price: "₹299",
-        discount: "70% OFF",
-      ),
-      SmallCourseCard(
-        img: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGlhbm98ZW58MHx8MHx8fDA%3D",
-        title: "Rock Drumming Basics",
-        instructor: "James Taylor",
-        price: "₹499",
-        discount: "LIMITED",
-      ),
-    ],
-  ),
-),
-
-          ]
+            const SizedBox(height: 100),
+            const Center(
+              child: Text(
+                "Developed by Red Media Solutions",
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
