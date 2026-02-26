@@ -85,7 +85,7 @@ class Profile extends StatelessWidget {
                           ),
                         );
                       }
-                      final displayName = snapshot.data ?? "KEERTHAN RAO";
+                      final displayName = snapshot.data ?? "NULL";
                       return Text(
                         displayName.toUpperCase(),
                         style: const TextStyle(
@@ -109,7 +109,7 @@ class Profile extends StatelessWidget {
                     "GENERAL",
                     style: TextStyle(
                       color: Colors.white38,
-                      fontSize: 13,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.6,
                     ),

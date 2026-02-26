@@ -35,8 +35,8 @@ class Notificationcard extends StatelessWidget {
               color: Colors.white.withOpacity(0.25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.dangerous,
-                color: Colors.black54, size: 24),
+            child: const Icon(Icons.donut_small,
+                color: Color.fromARGB(134, 116, 75, 138), size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(

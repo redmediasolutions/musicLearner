@@ -20,26 +20,28 @@ class HomeIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            height: 120,
-            width: 500,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(icon, color:iconcolor, size: 28),
-          ),
-          const SizedBox(height: 6),
-          Text(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        width: double.infinity,
+        height: 100,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: iconcolor, size: 80),
+            const SizedBox(width: 16),
+            Text(
             title,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
+              color: Color(0xFFB7BDF7),
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

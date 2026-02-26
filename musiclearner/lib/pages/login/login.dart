@@ -46,7 +46,7 @@ class _LoginState extends State<Login> {
 
       if (mounted) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('Login successful'), backgroundColor: Colors.green),
+          SnackBar(content: const Text('Login successful'), backgroundColor: Colors.white),
         );
         context.go('/home'); 
       }
@@ -54,7 +54,7 @@ class _LoginState extends State<Login> {
       messenger.showSnackBar(
         const SnackBar(
           content: Text('Invalid credentials or network error'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Colors.white,
         ),
       );
     }
