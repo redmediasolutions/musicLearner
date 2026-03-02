@@ -19,15 +19,19 @@ class Documents extends StatefulWidget {
 
 class _DocumentsState extends State<Documents> {
   bool _isUploading = false;
-  late Future<List<FileObject>> _filesFuture;
+  Future<List<FileObject>>? _filesFuture;
 
   @override
   void initState() {
     super.initState();
-    _refreshFiles();
+    // Use addPostFrameCallback to ensure context is available for the provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshFiles();
+    });
   }
 
   void _refreshFiles() {
+    if (!mounted) return;
     setState(() {
       _filesFuture = _fetchFilesFromStorage();
     });
@@ -35,56 +39,63 @@ class _DocumentsState extends State<Documents> {
 
   Future<List<FileObject>> _fetchFilesFromStorage() async {
     final authProvider = context.read<AuthProvider>();
-    final rollNo = authProvider.studentProfile?['student_rollno'];
+    // Updated to match your new studentData schema mapping
+    final rollNo = authProvider.studentData?['student_rollnotext'] ?? 
+                   authProvider.studentData?['student_rollno'];
 
     if (rollNo == null) return [];
 
     try {
       final supabase = Supabase.instance.client;
+      // Fetch list of files in the student's specific folder
       final List<FileObject> objects = await supabase.storage
           .from('student_docs')
           .list(path: '$rollNo');
       
       return objects.where((file) => file.name != '.emptyFolderPlaceholder').toList();
     } catch (e) {
+      debugPrint("Storage fetch error: $e");
       return [];
     }
   }
 
   Future<void> _handleUpload() async {
     final authProvider = context.read<AuthProvider>();
-    final rollNo = authProvider.studentProfile?['student_rollno'];
+    final rollNo = authProvider.studentData?['student_rollno'] ?? 
+                   authProvider.studentData?['student_rollno'];
     
-    if (rollNo == null) return;
+    if (rollNo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User session not found. Please log in again."))
+      );
+      return;
+    }
 
-    // 'withData: kIsWeb' is crucial for reading file contents in a browser
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'png', 'jpeg'],
-      withData: kIsWeb, 
+      withData: true, 
     );
 
     if (result != null) {
       setState(() => _isUploading = true);
       
+      final fileBytes = result.files.single.bytes;
       final fileName = result.files.single.name;
       final storagePath = '$rollNo/$fileName';
 
       try {
         final supabase = Supabase.instance.client;
         
-        if (kIsWeb) {
-          // Web path: Use bytes to avoid the namespace error
-          final fileBytes = result.files.single.bytes;
-          if (fileBytes != null) {
-            await supabase.storage.from('student_docs').uploadBinary(
-              storagePath,
-              fileBytes,
-              fileOptions: const FileOptions(upsert: true),
-            );
-          }
+        if (kIsWeb || fileBytes != null) {
+          // Reliable method for Web and Mobile when bytes are available
+          await supabase.storage.from('student_docs').uploadBinary(
+            storagePath,
+            fileBytes!,
+            fileOptions: const FileOptions(upsert: true),
+          );
         } else {
-          // Mobile path: Use the local file path safely
+          // Fallback for Mobile if bytes somehow missing but path exists
           final file = File(result.files.single.path!);
           await supabase.storage.from('student_docs').upload(
             storagePath,
@@ -94,17 +105,27 @@ class _DocumentsState extends State<Documents> {
         }
         
         _refreshFiles(); 
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Upload Successful!")));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Upload Successful!"), backgroundColor: Color(0xFF38B982)),
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Upload failed: $e")));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Upload failed: $e"), backgroundColor: Colors.redAccent),
+          );
+        }
       } finally {
-        setState(() => _isUploading = false);
+        if (mounted) setState(() => _isUploading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    const accentColor = Color(0xFFB7BDF7);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D0F24),
       appBar: AppBar(
@@ -115,55 +136,95 @@ class _DocumentsState extends State<Documents> {
           onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
         ),
-        title: const Text("Documents Center", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Documents Center", 
+          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)
+        ),
       ),
       body: Column(
         children: [
-          if (_isUploading) const LinearProgressIndicator(color: Color(0xFFB7BDF7)),
+          if (_isUploading) 
+            const LinearProgressIndicator(
+              backgroundColor: Color(0xFF1A1E36),
+              color: accentColor,
+            ),
           Expanded(
             child: FutureBuilder<List<FileObject>>(
               future: _filesFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: Color(0xFFB7BDF7)));
+                  return const Center(child: CircularProgressIndicator(color: accentColor));
                 }
 
                 final files = snapshot.data ?? [];
 
                 return RefreshIndicator(
+                  color: accentColor,
+                  backgroundColor: const Color(0xFF1A1E36),
                   onRefresh: () async => _refreshFiles(),
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text("Recent Uploads", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                            GestureDetector(
-                              onTap: _isUploading ? null : _handleUpload,
-                              child: Text("Upload new", style: TextStyle(color: _isUploading ? Colors.grey : const Color(0xFFB7BDF7), fontWeight: FontWeight.w900)),
+                            const Text(
+                              "Recent Uploads", 
+                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)
+                            ),
+                            TextButton.icon(
+                              onPressed: _isUploading ? null : _handleUpload,
+                              icon: const Icon(Icons.add_circle_outline, size: 18, color: accentColor),
+                              label: Text(
+                                "Upload new", 
+                                style: TextStyle(
+                                  color: _isUploading ? Colors.grey : accentColor, 
+                                  fontWeight: FontWeight.w900
+                                )
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
+                        const Divider(color: Colors.white10),
+                        const SizedBox(height: 10),
                         if (files.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 80),
-                            child: Text("No documents found.", style: TextStyle(color: Colors.white38)),
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 100),
+                              child: Column(
+                                children: const [
+                                  Icon(Icons.folder_open_rounded, size: 64, color: Colors.white10),
+                                  SizedBox(height: 16),
+                                  Text("No documents found.", style: TextStyle(color: Colors.white38)),
+                                ],
+                              ),
+                            ),
                           )
                         else
-                          ...files.map((file) {
-                            final isPdf = file.name.toLowerCase().endsWith('.pdf');
-                            final double sizeInKb = (file.metadata?['size'] ?? 0) / 1024;
-                            return Documentscard(
-                              title: file.name,
-                              subTitle: "${sizeInKb.toStringAsFixed(1)} KB • ${file.createdAt?.split('T')[0] ?? 'N/A'}",
-                              leadingIcon: isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
-                              onDownload: () {},
-                            );
-                          }).toList(),
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: files.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final file = files[index];
+                              final isPdf = file.name.toLowerCase().endsWith('.pdf');
+                              final sizeInKb = (file.metadata?['size'] ?? 0) / 1024;
+                              
+                              return Documentscard(
+                                title: file.name,
+                                subTitle: "${sizeInKb.toStringAsFixed(1)} KB • ${file.createdAt?.split('T')[0] ?? 'N/A'}",
+                                leadingIcon: isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
+                                onDownload: () {
+                                  // Add download logic here if needed
+                                },
+                              );
+                            },
+                          ),
                       ],
                     ),
                   ),

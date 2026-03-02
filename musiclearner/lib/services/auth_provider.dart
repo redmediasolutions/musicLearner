@@ -1,69 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final AuthService _authService = AuthService();
 
-  // Stores the logged-in student's record from the 'profile' table
-  Map<String, dynamic>? _studentProfile;
-  bool _isLoading = false;
+  User? user;
+  Map<String, dynamic>? studentData;
+  bool isLoading = false;
 
-  Map<String, dynamic>? get studentProfile => _studentProfile;
-  bool get isLoading => _isLoading;
-  bool get isLoggedIn => _studentProfile != null;
+  AuthProvider() {
+    _initialize();
+  }
 
-  /// LOGIN LOGIC
-  /// Directly queries the 'profile' table for student_email or student_rollno
-  Future<void> login(String identifier, String password) async {
-    // 1. Validation
-    if (identifier.trim().isEmpty || password.trim().isEmpty) {
-      throw const AuthException("Email/Roll Number and password are required");
+  /// Initialize state and listen for auth changes
+  void _initialize() {
+    user = _authService.currentUser;
+
+    if (user != null) {
+      loadStudentProfile();
     }
 
-    _isLoading = true;
+    // Auth listener handles automatic state updates for GoRouter
+    _authService.authStateChanges.listen((data) async {
+      user = data.session?.user;
+
+      if (user != null) {
+        await loadStudentProfile();
+      } else {
+        studentData = null;
+        notifyListeners();
+      }
+    });
+  }
+
+  /// REQUIRED GETTER FOR GOROUTER
+  bool get isLoggedIn => user != null;
+
+  /// LOAD STUDENT PROFILE
+  /// Populates studentData with info from the 'student' table.
+  Future<void> loadStudentProfile() async {
+    if (user == null) return;
+    
+    studentData = await _authService.getStudentProfile(user!.id);
+    notifyListeners();
+  }
+
+  /// LOGIN LOGIC
+  /// Handles both Roll Number and Email inputs.
+  Future<void> login(String identifier, String password) async {
+    isLoading = true;
     notifyListeners();
 
     try {
-      final cleanId = identifier.trim();
-      final cleanPass = password.trim();
+      // 1. Resolve identifier to a valid email
+      String resolvedEmail = await _authService.resolveEmail(identifier.trim());
 
-      // 2. Direct Database Query 
-      // We use the exact column names from your profile table screenshot
-      final response = await _supabase
-          .from('profile')
-          .select()
-          .or('student_email.eq.$cleanId,student_rollno.eq.$cleanId')
-          .eq('student_password', cleanPass)
-          .maybeSingle();
+      // 2. Perform Supabase Sign-in
+      await _authService.signIn(email: resolvedEmail, password: password);
 
-      // DEBUG: Check your console to see if the DB returned data or null
-      debugPrint("Login Query Identifier: $cleanId");
-      debugPrint("Login Query Result: $response");
-
-      if (response == null) {
-        // If this is null, the combination of ID and Password was not found
-        throw const AuthException("Invalid Email/Roll Number or Password");
-      }
-
-      // 3. Set Session
-      _studentProfile = response;
-      notifyListeners();
-
-    } catch (e) {
-      debugPrint("Detailed Login Error: $e");
-      rethrow; 
+      // Note: loadStudentProfile is triggered automatically by the listener
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
 
-  /// LOGOUT
+  /// LOGOUT LOGIC
+  /// Clears user session and notifies listeners to trigger GoRouter redirect.
   Future<void> logout() async {
-    _studentProfile = null;
-    notifyListeners();
+    try {
+      await _authService.signOut();
+      user = null;
+      studentData = null;
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Logout error: $e");
+    }
   }
-
-  /// Helper: Get the Roll Number for the currently logged-in user
-  String? get currentRollNo => _studentProfile?['student_rollno'];
 }

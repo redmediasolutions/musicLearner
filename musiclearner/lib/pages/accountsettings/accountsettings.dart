@@ -22,33 +22,20 @@ class _AccountsettingsState extends State<Accountsettings> {
 
   bool _isNameEditable = false;
   bool _isPhoneEditable = false;
-  bool _isLoading = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadStudentData();
+    _fillInitialData();
   }
 
-  Future<void> _loadStudentData() async {
-    final authProvider = context.read<AuthProvider>();
-    final rollNo = authProvider.studentProfile?['student_rollno'];
-
-    if (rollNo == null) return;
-
-    try {
-      final supabase = Supabase.instance.client;
-      
-      final studentRes = await supabase.from('student').select('student_name').eq('student_rollno', rollNo).maybeSingle();
-      final profileRes = await supabase.from('profile').select('student_phoneno').eq('student_rollno', rollNo).maybeSingle();
-
-      setState(() {
-        _nameController.text = studentRes?['student_name'] ?? "";
-        _phoneController.text = profileRes?['student_phoneno'] ?? "";
-        _isLoading = false;
-      });
-    } catch (e) {
-      debugPrint("Error loading data: $e");
+  // Use the data already available in the Provider
+  void _fillInitialData() {
+    final studentData = context.read<AuthProvider>().studentData;
+    if (studentData != null) {
+      _nameController.text = studentData['student_name'] ?? studentData['student_name'] ?? "";
+      _phoneController.text = studentData['student_Phoneno'] ?? studentData['contact_number'] ?? "";
     }
   }
 
@@ -58,6 +45,7 @@ class _AccountsettingsState extends State<Accountsettings> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF1A1E36),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text("Confirm Changes", style: TextStyle(color: Colors.white)),
           content: const Text("Are you sure you want to update your profile details?", style: TextStyle(color: Colors.white70)),
           actions: [
@@ -80,7 +68,7 @@ class _AccountsettingsState extends State<Accountsettings> {
 
   Future<void> _saveToDatabase() async {
     final authProvider = context.read<AuthProvider>();
-    final rollNo = authProvider.studentProfile?['student_rollno'];
+    final rollNo = authProvider.studentData?['student_rollno'] ?? authProvider.studentData?['student_rollno'];
 
     if (rollNo == null) return;
 
@@ -89,13 +77,19 @@ class _AccountsettingsState extends State<Accountsettings> {
     try {
       final supabase = Supabase.instance.client;
 
-      await Future.wait([
-        supabase.from('student').update({'student_name': _nameController.text}).eq('student_rollno', rollNo),
-        supabase.from('profile').update({'student_phoneno': _phoneController.text}).eq('student_rollno', rollNo),
-      ]);
+      // Update the single 'students' table based on your new schema
+      await supabase.from('student').update({
+        'student_name': _nameController.text,
+        'student_Phoneno': _phoneController.text,
+      }).eq('student_rollno', rollNo);
+
+      // CRITICAL: Refresh the provider data so the Home page name updates too
+      await authProvider.loadStudentProfile();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Account Settings Updated Successfully")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Account Settings Updated Successfully"), backgroundColor: Color(0xFF38B982)),
+        );
         context.pop();
       }
     } catch (e) {
@@ -163,12 +157,8 @@ class _AccountsettingsState extends State<Accountsettings> {
                     focusNode: _nameFocus,
                     onIconPressed: () {
                       setState(() {
-                        if (_isNameEditable) {
-                          _isNameEditable = false;
-                        } else {
-                          _isNameEditable = true;
-                          _nameFocus.requestFocus();
-                        }
+                        _isNameEditable = !_isNameEditable;
+                        if (_isNameEditable) _nameFocus.requestFocus();
                       });
                     },
                   ),
@@ -180,12 +170,8 @@ class _AccountsettingsState extends State<Accountsettings> {
                     focusNode: _phoneFocus,
                     onIconPressed: () {
                       setState(() {
-                        if (_isPhoneEditable) {
-                          _isPhoneEditable = false;
-                        } else {
-                          _isPhoneEditable = true;
-                          _phoneFocus.requestFocus();
-                        }
+                        _isPhoneEditable = !_isPhoneEditable;
+                        if (_isPhoneEditable) _phoneFocus.requestFocus();
                       });
                     },
                   ),
@@ -207,28 +193,31 @@ class _AccountsettingsState extends State<Accountsettings> {
   }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white38, fontSize: 10)),
+      title: Text(label, style: const TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1)),
       subtitle: isEditable
           ? TextField(
               controller: controller,
               focusNode: focusNode,
-              autofocus: true,
               style: const TextStyle(color: Colors.white, fontSize: 15),
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 isDense: true,
-                contentPadding: EdgeInsets.only(top: 4),
+                contentPadding: EdgeInsets.only(top: 8),
               ),
               onSubmitted: (_) => onIconPressed(),
             )
-          : Text(
-              controller.text,
-              style: const TextStyle(color: Colors.white, fontSize: 15),
+          : Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                controller.text.isEmpty ? "Not set" : controller.text,
+                style: const TextStyle(color: Colors.white, fontSize: 15),
+              ),
             ),
       trailing: IconButton(
         icon: Icon(
-          isEditable ? Icons.check : Icons.chevron_right,
+          isEditable ? Icons.check_circle_rounded : Icons.edit_rounded,
           color: isEditable ? const Color(0xFF38B982) : Colors.white30,
+          size: 20,
         ),
         onPressed: onIconPressed,
       ),
@@ -242,7 +231,10 @@ class _AccountsettingsState extends State<Accountsettings> {
         children: [
           Container(
             width: 120, height: 120,
-            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(width: 3, color: const Color(0xFFB7BDF7))),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle, 
+              border: Border.all(width: 2, color: const Color(0xFFB7BDF7).withOpacity(0.5))
+            ),
           ),
           const CircleAvatar(
             radius: 54,

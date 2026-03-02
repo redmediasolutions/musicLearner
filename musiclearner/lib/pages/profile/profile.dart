@@ -3,31 +3,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../services/auth_provider.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
 
-  Future<String?> _getStudentName(BuildContext context) async {
-    final authProvider = context.read<AuthProvider>();
-    final rollNo = authProvider.studentProfile?['student_rollno'];
-
-    if (rollNo == null) return "USER";
-
-    final supabase = Supabase.instance.client;
-    final response = await supabase
-        .from('student')
-        .select('student_name')
-        .eq('student_rollno', rollNo)
-        .maybeSingle();
-
-    return response?['student_name'];
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Watch the student data from the provider
+    final studentData = context.watch<AuthProvider>().studentData;
+    
+    // Extract name or fallback to "USER"
+    final displayName = studentData?['student_name'] ?? 
+                        studentData?['student_name'] ?? 
+                        "USER";
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D0F24),
       appBar: AppBar(
@@ -49,57 +39,49 @@ class Profile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // --- PROFILE HEADER ---
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: Column(
                 children: [
-                  Stack(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFFB7BDF7),
-                        ),
-                        child: const CircleAvatar(
-                          radius: 55,
-                          backgroundColor: Color(0xFF0D0F24),
-                          backgroundImage: NetworkImage(
-                            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60",
-                          ),
-                        ),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFB7BDF7),
+                    ),
+                    child: const CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Color(0xFF0D0F24),
+                      backgroundImage: NetworkImage(
+                        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60",
                       ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 14),
-                  FutureBuilder<String?>(
-                    future: _getStudentName(context),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFFB7BDF7),
-                          ),
-                        );
-                      }
-                      final displayName = snapshot.data ?? "NULL";
-                      return Text(
-                        displayName.toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    },
+                  // No more FutureBuilder!
+                  Text(
+                    displayName.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  Text(
+                    studentData?['student_rollno'] ?? "",
+                    style: const TextStyle(
+                      color: Colors.white38,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 10),
                 ],
               ),
             ),
+
+            // --- MENU SECTION ---
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -109,151 +91,40 @@ class Profile extends StatelessWidget {
                     "GENERAL",
                     style: TextStyle(
                       color: Colors.white38,
-                      fontSize: 15,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.6,
                     ),
                   ),
                 ),
 
-                // Account Settings
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 6,
-                  ),
-                  child: GestureDetector(
-                    onTap: () => context.pushNamed('accountsettings'),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1D2F),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(
-                            Icons.person,
-                            color: Color(0xFFB7BDF7),
-                            size: 24,
-                          ),
-                          SizedBox(width: 14),
-                          Expanded(
-                            child: Text(
-                              "Account Settings",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.white24,
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                _buildProfileMenuItem(
+                  context: context,
+                  icon: Icons.person_outline_rounded,
+                  title: "Account Settings",
+                  routeName: 'accountsettings',
+                ),
+                _buildProfileMenuItem(
+                  context: context,
+                  icon: Icons.badge_outlined,
+                  title: "Admission Details",
+                  routeName: 'admissiondetails',
+                ),
+                _buildProfileMenuItem(
+                  context: context,
+                  icon: Icons.folder_open_rounded,
+                  title: "Documents",
+                  routeName: 'documents',
                 ),
 
-                // Admission Details
+                // Logout Button
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 6,
-                  ),
-                  child: GestureDetector(
-                    onTap: () => context.pushNamed('admissiondetails'),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1D2F),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(
-                            Icons.local_activity,
-                            color: Color(0xFFB7BDF7),
-                            size: 24,
-                          ),
-                          SizedBox(width: 14),
-                          Expanded(
-                            child: Text(
-                              "Admission Details",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.white24,
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Documents
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 6,
-                  ),
-                  child: GestureDetector(
-                    onTap: () => context.pushNamed('documents'),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1D2F),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(
-                            Icons.document_scanner,
-                            color: Color(0xFFB7BDF7),
-                            size: 24,
-                          ),
-                          SizedBox(width: 14),
-                          Expanded(
-                            child: Text(
-                              "Documents",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.white24,
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Logout
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 6,
-                  ),
-                  child: GestureDetector(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
                     onTap: () {
-                      Provider.of<AuthProvider>(
-                        context,
-                        listen: false,
-                      ).logout();
+                      context.read<AuthProvider>().logout();
+                      // Navigation is usually handled by auth listener in main.dart
                     },
                     child: Container(
                       padding: const EdgeInsets.all(16),
@@ -263,12 +134,16 @@ class Profile extends StatelessWidget {
                       ),
                       child: Row(
                         children: const [
-                          Icon(Icons.logout, color: Colors.red, size: 24),
+                          Icon(Icons.logout_rounded, color: Colors.redAccent, size: 24),
                           SizedBox(width: 14),
                           Expanded(
                             child: Text(
                               "Logout",
-                              style: TextStyle(color: Colors.red, fontSize: 15),
+                              style: TextStyle(
+                                color: Colors.redAccent, 
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -279,6 +154,42 @@ class Profile extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Helper method to keep code clean and scannable
+  Widget _buildProfileMenuItem({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String routeName,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.pushNamed(routeName),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1D2F),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: const Color(0xFFB7BDF7), size: 24),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 14),
+            ],
+          ),
         ),
       ),
     );

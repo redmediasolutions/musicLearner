@@ -3,35 +3,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_provider.dart';
 import 'package:musiclearner/components/quickaccess.dart';
 
 class Homelanding extends StatelessWidget {
   const Homelanding({super.key});
 
-  Future<String?> _getStudentName(BuildContext context) async {
-    final authProvider = context.read<AuthProvider>();
-    final rollNo = authProvider.studentProfile?['student_rollno'];
-
-    if (rollNo == null) return "STUDENT";
-
-    try {
-      final supabase = Supabase.instance.client;
-      final response = await supabase
-          .from('student')
-          .select('student_name')
-          .eq('student_rollno', rollNo)
-          .maybeSingle();
-
-      return response?['student_name'];
-    } catch (e) {
-      return "STUDENT";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    
+    final studentData = context.watch<AuthProvider>().studentData;
+    
+    // Extract name or use fallback
+    final studentName = studentData?['student_name']?.toString().toUpperCase() ?? "STUDENT";
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D0F24),
       body: SingleChildScrollView(
@@ -39,6 +24,7 @@ class Homelanding extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- HEADER SECTION ---
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
               child: Row(
@@ -68,36 +54,21 @@ class Homelanding extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 3),
-                          FutureBuilder<String?>(
-                            future: _getStudentName(context),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const SizedBox(
-                                  height: 10,
-                                  width: 10,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Color(0xFFB7BDF7),
-                                  ),
-                                );
-                              }
-                              // Displays fetched name or fallback to "KEERTHAN"
-                              final displayName = snapshot.data ?? "KEERTHAN"; 
-                              return Text(
-                                displayName.toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  letterSpacing: 1.6,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            },
+                          // No more FutureBuilder needed!
+                          Text(
+                            studentName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              letterSpacing: 1.6,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
                     ],
                   ),
+                  // Notification/Profile Icon
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -114,6 +85,8 @@ class Homelanding extends StatelessWidget {
                 ],
               ),
             ),
+
+            // --- SEARCH BAR ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
@@ -133,7 +106,10 @@ class Homelanding extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 25),
+
+            // --- QUICK ACCESS SECTION ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -159,7 +135,9 @@ class Homelanding extends StatelessWidget {
                 ],
               ),
             ),
+
             const SizedBox(height: 20),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -198,7 +176,9 @@ class Homelanding extends StatelessWidget {
                 ],
               ),
             ),
+
             const SizedBox(height: 100),
+
             const Center(
               child: Text(
                 "Developed by Red Media Solutions",
